@@ -8,10 +8,8 @@ const Promise = require('bluebird');
 
 const { JSDOM } = require("jsdom");
 
-//var xml = fs.readFileSync(path.join('.', argv.file), { encoding: 'utf8' });
-
 function extractChapter(file) {
-    return JSDOM.fromFile(file, {})
+    return JSDOM.fromURL(file)
         .then(dom => dom.serialize())
         .then(html => html.replace(/-?\[p\.\d+\]-?/igm, ''))
         .then(html => new JSDOM(html))
@@ -47,11 +45,7 @@ function extractChapter(file) {
                 return Promise.reject('Too many footnotes found.');
             }
 
-            // const footnoteCount = parseInt(match[1], 10);
-            // if (isNaN(footnoteCount)) {
-            //     return Promise.reject(`invalid footnote count: ${match[1]}`);
-            // }
-        
+            // break out the footnotes from the paragraphs
             const footnotes = paragraphs.splice(paragraphs.length - footnoteCount, paragraphs.length);
             
             // drop the "Notes:"
@@ -76,29 +70,26 @@ function extractChapter(file) {
                 paragraphs: paragraphs.map(p => p.replace(
                     /<a href="#(\d+)"><sup>\1<\/sup><\/a>/g, 
                     `<a href="#${chpCnt}_$1" name="${chpCnt}_$1_b"><sup>$1<\/sup><\/a>`)),
-                    // `<a href="#${chpCnt}_$1" name="${chpCnt}_$1_b"><sup>$1<\/sup><\/a>`)),
                 footnotes: footnotes.map(f => f.replace(
                     /^(\d+)\.?\s*<a name="\1"><\/a>/, 
                     `<a name="${chpCnt}_$1" href="#${chpCnt}_$1_b">$1.<\/a>`))
-                    // `<a name="${chpCnt}_$1" href="${chpCnt}_$1_b">$1.<\/a>`))
             });
         });
 }
 
-// JSDOM.fromURL("http://signaturebookslibrary.org/power-from-on-high-01-2/", {})
 const getBookContents = function () {
     const basePath = path.join(__dirname, '..', '..', 'tmp');
     
     return Promise.mapSeries([
-        'signaturebookslibrary.org/power-from-on-high-01-2/index.html',
-        'signaturebookslibrary.org/power-from-on-high-02/index.html',
-        'signaturebookslibrary.org/power-from-on-high-03/index.html',
-        'signaturebookslibrary.org/power-from-on-high-04/index.html',
-        'signaturebookslibrary.org/power-from-on-high-05/index.html',
-        'signaturebookslibrary.org/power-from-on-high-06/index.html',
-        'signaturebookslibrary.org/power-from-on-high-07/index.html',
-        'signaturebookslibrary.org/power-from-on-high-08/index.html',
-    ].map(f => path.join(basePath, f)), extractChapter)
+        'http://signaturebookslibrary.org/power-from-on-high-01-2/',
+        'http://signaturebookslibrary.org/power-from-on-high-02/',
+        'http://signaturebookslibrary.org/power-from-on-high-03/',
+        'http://signaturebookslibrary.org/power-from-on-high-04/',
+        'http://signaturebookslibrary.org/power-from-on-high-05/',
+        'http://signaturebookslibrary.org/power-from-on-high-06/',
+        'http://signaturebookslibrary.org/power-from-on-high-07/',
+        'http://signaturebookslibrary.org/power-from-on-high-08/',
+    ], extractChapter)
         .then((chapters) => Promise.resolve({
             title: 'Power from on High',
             author: 'Gregory A. Prince',
@@ -109,16 +100,3 @@ const getBookContents = function () {
 _.assign(module.exports, {
     getBookContents
 });
-
-getBookContents();
-//
-// const dom = new JSDOM(xml);
-// debugger;
-// var doc = new DOMParser().parseFromString(xml, 'text/html');
-// debugger;
-// var nodes = select(doc, "//div[contains(@class, 'post')]//div[contains(@class, 'entry')]");
-// debugger;
-// console.log(nodes[0].localName + ": " + nodes[0].firstChild.data);
-// console.log("node: " + nodes[0].toString());
-//
-// debugger;
