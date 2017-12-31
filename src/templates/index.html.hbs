@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ {{!-- <meta charset="utf-8" /> --}}
+ <title>{{{title}}}{{#if author}} by {{{author}}}{{/if}}</title>
+ <style>
+ p { margin-top: 1em; text-indent: 0em; }
+ 
+ h1 {margin-top: 1em}
+ h2 {margin: 2em 0 1em; text-align: center; font-size: 2.5em;}
+ h3 {margin: 0 0 2em; font-weight: normal; text-align:center; font-size: 1.5em; font-style: italic;}
+ 
+ .center { text-align: center; }
+ .pagebreak { page-break-before: always; }
+  </style>
+{{!--  <link rel="stylesheet" href="style.css"  type="text/css" /> --}}
+</head>
+<body>
+	
+<div id="toc">
+ <h2>
+ Table of Contents <br />
+ </h2>
+ <ul>
+{{#each chapters as |chapter|}} 
+ <li><a href="#ch{{chapter.number}}">{{{chapter.title}}}</a></li>
+{{/each}}
+ </ul>
+</div>
+<div class="pagebreak"></div>
+
+{{#each chapters as |chapter|}}
+
+<h2 id="ch{{chapter.number}}">{{{chapter.title}}}</h2>
+{{!-- 
+<h3>Subtitle</h3>
+ 
+<blockquote>
+ <p>Some quote</p>
+</blockquote>
+ --}}
+
+{{#each paragraphs as |paragraph|}}
+<p>{{{paragraph}}}</p>
+{{/each}}
+{{!--
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<div class="center">* * *</div>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+ --}} 
+ 
+<div class="pagebreak"></div>
+{{/each}}
+
+<p><strong>Footnotes</strong></p>
+{{#each chapters as |chapter|}}
+  <p><strong>{{{chapter.title}}}</strong></p>
+  {{#each chapter.footnotes as |footnote|}}
+      <p>{{{footnote}}}</p>
+  {{/each}}
+{{/each}}	
+</body>
+</html>

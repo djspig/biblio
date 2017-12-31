@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+ <head>
+ </head>
+        <docTitle>
+               <text>{{{title}}}</text>
+        </docTitle>
+ <navMap>
+ <navPoint id="toc" playOrder="1">
+ <navLabel>
+ <text>
+ Table of Contents
+ </text>
+ </navLabel>
+ <content src="index.html#toc" />
+ </navPoint>
+ {{#each chapters as |chapter|}}
+ <navPoint id="ch{{chapter.number}}" playOrder="{{math @index '+' 2}}">
+ <navLabel>
+ <text>
+{{{chapter.title}}}
+ </text>
+ </navLabel>
+ <content src="index.html#ch{{chapter.number}}" />
+ </navPoint>
+ {{/each}}
+</navMap>
+</ncx>
