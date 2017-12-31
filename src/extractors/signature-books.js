@@ -11,10 +11,9 @@ const { JSDOM } = require("jsdom");
 //var xml = fs.readFileSync(path.join('.', argv.file), { encoding: 'utf8' });
 
 function extractChapter(file) {
-    // return JSDOM.fromFile(file, {})
-    return JSDOM.fromUrl(file, {})
+    return JSDOM.fromFile(file, {})
         .then(dom => dom.serialize())
-        .then(html => html.replace(/\[p\.\d+\]/igm, ''))
+        .then(html => html.replace(/-?\[p\.\d+\]-?/igm, ''))
         .then(html => new JSDOM(html))
         .then(dom => dom.window.document.querySelector('div.entry > p'))
         .then(element => {
@@ -91,14 +90,14 @@ const getBookContents = function () {
     const basePath = path.join(__dirname, '..', '..', 'tmp');
     
     return Promise.mapSeries([
-        'http://signaturebookslibrary.org/power-from-on-high-01-2/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-02/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-03/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-04/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-05/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-06/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-07/index.html',
-        'http://signaturebookslibrary.org/power-from-on-high-08/index.html',
+        'signaturebookslibrary.org/power-from-on-high-01-2/index.html',
+        'signaturebookslibrary.org/power-from-on-high-02/index.html',
+        'signaturebookslibrary.org/power-from-on-high-03/index.html',
+        'signaturebookslibrary.org/power-from-on-high-04/index.html',
+        'signaturebookslibrary.org/power-from-on-high-05/index.html',
+        'signaturebookslibrary.org/power-from-on-high-06/index.html',
+        'signaturebookslibrary.org/power-from-on-high-07/index.html',
+        'signaturebookslibrary.org/power-from-on-high-08/index.html',
     ].map(f => path.join(basePath, f)), extractChapter)
         .then((chapters) => Promise.resolve({
             title: 'Power from on High',

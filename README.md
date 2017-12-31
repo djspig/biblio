@@ -7,3 +7,8 @@ http://signaturebookslibrary.org/new-mormon-history/
 
 # Thanks
 Thanks to https://www.aliciaramirez.com/2014/05/how-to-make-a-kindle-ebook-from-scratch/ for providing the initial details on how to build an Amazon Kindle ebook (mobi format).
+
+# TODO
+- Add information on how to download and build using kindlegen
+- Add commandline args for building specific books
+- Add conference from 2017 April and October
