@@ -11,7 +11,8 @@ const { JSDOM } = require("jsdom");
 //var xml = fs.readFileSync(path.join('.', argv.file), { encoding: 'utf8' });
 
 function extractChapter(file) {
-    return JSDOM.fromFile(file, {})
+    // return JSDOM.fromFile(file, {})
+    return JSDOM.fromUrl(file, {})
         .then(dom => dom.serialize())
         .then(html => html.replace(/\[p\.\d+\]/igm, ''))
         .then(html => new JSDOM(html))
@@ -34,10 +35,23 @@ function extractChapter(file) {
             }
 
             // if so, how many?
-            const footnoteCount = parseInt(match[1], 10);
-            if (isNaN(footnoteCount)) {
-                return Promise.reject(`invalid footnote count: ${match[1]}`);
+            let footnoteCount = 0;
+            let foundFirstFootnote = false;
+
+            while (footnoteCount < paragraphs.length && 
+                !paragraphs[paragraphs.length - footnoteCount - 1].match(/^\s*1\.?\s*<a name/)) {
+                footnoteCount++;
             }
+            footnoteCount++;
+
+            if (footnoteCount >= paragraphs.length) {
+                return Promise.reject('Too many footnotes found.');
+            }
+
+            // const footnoteCount = parseInt(match[1], 10);
+            // if (isNaN(footnoteCount)) {
+            //     return Promise.reject(`invalid footnote count: ${match[1]}`);
+            // }
         
             const footnotes = paragraphs.splice(paragraphs.length - footnoteCount, paragraphs.length);
             
@@ -51,7 +65,7 @@ function extractChapter(file) {
             // extract the title number
             const titleMatch = title.match(/^Chapter (\d+)\.[\s\S]*$/im);
             const chpCnt = parseInt(titleMatch[1], 10);
-            
+
             if (!titleMatch || isNaN(chpCnt)) {
                 return Promise.reject(`invalid title: ${title}`);
             }
@@ -65,7 +79,7 @@ function extractChapter(file) {
                     `<a href="#${chpCnt}_$1" name="${chpCnt}_$1_b"><sup>$1<\/sup><\/a>`)),
                     // `<a href="#${chpCnt}_$1" name="${chpCnt}_$1_b"><sup>$1<\/sup><\/a>`)),
                 footnotes: footnotes.map(f => f.replace(
-                    /^(\d+).<a name="\1"><\/a>/, 
+                    /^(\d+)\.?\s*<a name="\1"><\/a>/, 
                     `<a name="${chpCnt}_$1" href="#${chpCnt}_$1_b">$1.<\/a>`))
                     // `<a name="${chpCnt}_$1" href="${chpCnt}_$1_b">$1.<\/a>`))
             });
@@ -77,14 +91,14 @@ const getBookContents = function () {
     const basePath = path.join(__dirname, '..', '..', 'tmp');
     
     return Promise.mapSeries([
-        'signaturebookslibrary.org/power-from-on-high-01-2/index.html',
-        'signaturebookslibrary.org/power-from-on-high-02/index.html',
-        'signaturebookslibrary.org/power-from-on-high-03/index.html',
-        'signaturebookslibrary.org/power-from-on-high-04/index.html',
-        'signaturebookslibrary.org/power-from-on-high-05/index.html',
-        'signaturebookslibrary.org/power-from-on-high-06/index.html',
-        'signaturebookslibrary.org/power-from-on-high-07/index.html',
-        'signaturebookslibrary.org/power-from-on-high-08/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-01-2/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-02/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-03/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-04/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-05/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-06/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-07/index.html',
+        'http://signaturebookslibrary.org/power-from-on-high-08/index.html',
     ].map(f => path.join(basePath, f)), extractChapter)
         .then((chapters) => Promise.resolve({
             title: 'Power from on High',
