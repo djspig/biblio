@@ -1,0 +1,25 @@
+<h2 id="ch{{number}}">{{{title}}}</h2>
+
+{{#if subtitle}}
+<h3>{{subtitle}}</h3>
+{{/if}}
+{{!--
+<h3>Subtitle</h3>
+
+<blockquote>
+ <p>Some quote</p>
+</blockquote>
+ --}}
+
+{{#each paragraphs as |paragraph|}}
+<p>{{{paragraph}}}</p>
+{{/each}}
+{{!--
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<div class="center">* * *</div>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+<p>Lorem ipsum dolor sit amet, consectetur ... </p>
+ --}}
