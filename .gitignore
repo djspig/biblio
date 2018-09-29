@@ -2,5 +2,6 @@
 node_modules/
 tmp/
 build/
+cache/
 
 package-lock.json
