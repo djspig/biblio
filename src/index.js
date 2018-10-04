@@ -13,17 +13,17 @@ var mkdirp = Promise.promisify(require('mkdirp'));
 
 const { getBookContents } = require('./extractors/signature-books');
 
-Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
-    lvalue = parseFloat(lvalue);
-    rvalue = parseFloat(rvalue);
+Handlebars.registerHelper("math", function (lvalue, operator, rvalue, options) {
+  lvalue = parseFloat(lvalue);
+  rvalue = parseFloat(rvalue);
 
-    return {
-        "+": lvalue + rvalue,
-        "-": lvalue - rvalue,
-        "*": lvalue * rvalue,
-        "/": lvalue / rvalue,
-        "%": lvalue % rvalue
-    }[operator];
+  return {
+    "+": lvalue + rvalue,
+    "-": lvalue - rvalue,
+    "*": lvalue * rvalue,
+    "/": lvalue / rvalue,
+    "%": lvalue % rvalue
+  }[operator];
 });
 
 function prepareBuildPath() {
@@ -36,18 +36,18 @@ function prepareBuildPath() {
 
 function buildTemplates() {
   // load up the templates
-	return Promise.reduce(
-		fs.readdirAsync(templateDir),
-		(memo, item) => {
-			const match = item.match(/^(.*)\.hbs$/);
-			if (match) {
-				const filepath = path.join(templateDir, item);
-				const file = fs.readFileSync(filepath, { encoding: 'utf8' })
-				memo[match[1]] = Handlebars.compile(file);
-			}
-			return memo;
-		},
-		{}
+  return Promise.reduce(
+    fs.readdirAsync(templateDir),
+    (memo, item) => {
+      const match = item.match(/^(.*)\.hbs$/);
+      if (match) {
+        const filepath = path.join(templateDir, item);
+        const file = fs.readFileSync(filepath, { encoding: 'utf8' })
+        memo[match[1]] = Handlebars.compile(file);
+      }
+      return memo;
+    },
+    {}
   );
 }
 
@@ -57,16 +57,15 @@ function registerPartials() {
     fs.readdirAsync(partialDir),
     (memo, item) => {
       const match = item.match(/^(.*)\.hbs$/);
-			if (match) {
-				const filepath = path.join(partialDir, item);
-				const file = fs.readFileSync(filepath, { encoding: 'utf8' })
-				memo[match[1]] = file;
-			}
-			return memo;
+      if (match) {
+        const filepath = path.join(partialDir, item);
+        const file = fs.readFileSync(filepath, { encoding: 'utf8' })
+        memo[match[1]] = file;
+      }
+      return memo;
     },
     {}
-  ).then(partials => {
-    return Handlebars.registerPartial(partials);})
+  ).tap(partials => Handlebars.registerPartial(partials))
 }
 
 function getBuilder() {
@@ -75,7 +74,7 @@ function getBuilder() {
   }
 
   return Promise.resolve()
-    .then(() => require(path.join(process.cwd(), _.first(argv._))))
+    .then(() => require(path.resolve(_.first(argv._))))
     .then(builder => !_.isFunction(builder.getBookContents) ? Promise.reject('Missing "getBookContents()"') : builder);
 }
 
@@ -84,7 +83,7 @@ return Promise.props({
   templates: registerPartials().then(() => buildTemplates()),
   builder: getBuilder(),
 })
-	.then(({ templates, builder, buildDir }) => builder.getBookContents()
+  .then(({ templates, builder, buildDir }) => builder.getBookContents(argv._.slice(1))
     .then(book => Promise.props(_.transform(templates, (memo, value, key) => memo[key] = templates[key](book), {})))
     .then(results => Promise.each(_.keys(results), (key) => fs.writeFileAsync(path.join(buildDir, key), results[key])))
   );
