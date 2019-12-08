@@ -1,12 +1,8 @@
-const argv = require('minimist')(process.argv.slice(2));
-const select = require('xpath.js');
-const DOMParser = require('xmldom').DOMParser;
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const _ = require('lodash');
 const Promise = require('bluebird');
-const request = require('superagent');
 const mkdirp = Promise.promisify(require('mkdirp'));
 
 const { JSDOM } = require("jsdom");
@@ -21,47 +17,6 @@ function DownloadAndSaveFile(location, root) {
         .catch(error => JSDOM.fromURL(location))
         .then(dom => dom.serialize())
         .tap(html => Promise.fromCallback(cb => fs.writeFile(path.join(root, filename), html, cb)));
-}
-
-function extractFootnotes(chpCnt, talk) {
-
-  return Promise.resolve()
-    .then(() => JSDOM.fragment(talk))
-    .then(dom => dom.querySelector('footer.notes > ol > li'))
-    .then(element => {
-      const footnotes = [];
-      while (element) {
-        footnotes.push(element.innerHTML);
-        element = element.nextElementSibling;
-      }
-      return footnotes;
-    })
-    .then(footnotes => Promise.mapSeries(footnotes, (footnote) =>
-      Promise.resolve(JSDOM.fragment(footnote))
-        .then(dom => dom.querySelector('p'))
-        .then(element => element && element.innerHTML)))
-    .then(footnotes => footnotes.map((p, index) => `
-        <a href="#${chpCnt}_${index + 1}" name="${chpCnt}_${index + 1}_b"><sup>${index + 1}<\/sup><\/a>
-        ${p.replace(/(\s+href\s*=\s*(?:"|'))\//ig, "$1https://www.churchofjesuschrist.org/")}`));
-}
-
-function extractParagraphs(chpCnt, talk) {
-  return Promise.resolve()
-    .then(html => JSDOM.fragment(talk))
-    .then(dom => dom.querySelector('div.body-block > p'))
-    .then(element => {
-        const paragraphs = [];
-        while (element) {
-            paragraphs.push(element.innerHTML);
-            element = element.nextElementSibling;
-        }
-        return paragraphs;
-    })
-    .then(paragraphs => {
-      return paragraphs.map(p => p.replace(
-        /<a\s+class\s*=\s*"note-ref"\s+href=\s*"#note(\d+)"\s*>\s*<sup\s+class="marker"\s*>\s*\1\s*<\/sup>\s*<\/a>/igm,
-        `<a href="#${chpCnt}_$1_b" name="${chpCnt}_$1"><sup>$1<\/sup><\/a>`));
-    });
 }
 
 function extractTalk(html, index) {
@@ -95,37 +50,16 @@ function extractTalk(html, index) {
                 .then(footnotes => footnotes.map((p, idx) => p
                     .replace(/<a [^>]*>/g, '')
                     .replace(/<\/a>/g, '')
-                    // .replace(/^.*id="note([^"]*)".*$/, `<a href="#${index}_$1_b" name="${index}_$1">[${idx}]</a> $&`)
                 ))
                 .then(footnotes => footnotes.map((p, idx) => `<a href="#${index}_${idx+1}_b" name="${index}_${idx+1}">[${idx+1}]</a> ${p}`))
         })
         .catch(error => console.error('Error extracting article', error)));
 }
 
-function ExtractTalk(url, chptIndex) {
-  const basePath = path.join(__dirname, '..', '..', 'tmp');
-
-  return Promise.resolve(`https://www.churchofjesuschrist.org${url}`)
-    .tap(url => console.log('GET', url))
-    .then((url) => request
-      .get(url)
-      .query('lang=spa&json')
-    )
-    .then(response => JSON.parse(response.res.text))
-    .then(talk => Promise.props({
-      title: _.get(talk, 'subComponents.ldsOrgHead.meta.title'),
-      number: chptIndex,
-      paragraphs: extractParagraphs(chptIndex, _.get(talk, 'subComponents.articleContent.articleContent')),
-      footnotes: extractFootnotes(chptIndex, _.get(talk, 'subComponents.textDrawer.reference')),
-    }))
-    .tapCatch(err => console.error('Error:', JSON.stringify(err)));
-}
-
 const getBookContents = function () {
     const basePath = path.join(__dirname, '..', '..', 'tmp');
 
-    return Promise.resolve('https://www.churchofjesuschrist.org/study/general-conference/2019/10/11holland?lang=eng')
-    // return Promise.resolve('https://www.churchofjesuschrist.org/general-conference?lang=spa')
+    return Promise.resolve('https://www.churchofjesuschrist.org/study/general-conference/2019/10/11holland?lang=spa')
         .then(location => ([
             location,
             path.resolve(__dirname, '..', '..', 'cache', encodeURIComponent(url.parse(location).path.slice(1).replace(/\/$/, '')))
