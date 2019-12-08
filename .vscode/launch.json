@@ -10,7 +10,8 @@
             "name": "Launch Program",
             // "program": "${workspaceFolder}/src/index.js",
             "program": "${workspaceFolder}/src/index.js",
-            "args": ["${workspaceFolder}/src/extractors/religious-studies-center.js", "https://rsc.byu.edu/out-print/book-mormon-keystone-scripture"],
+            "args": ["${workspaceFolder}/src/extractors/general-conference-html.js"],
+            // "args": ["${workspaceFolder}/src/extractors/religious-studies-center.js", "https://rsc.byu.edu/out-print/book-mormon-keystone-scripture"],
             // "args": ["./src/extractors/signature-books.js"],
             // "args": ["./src/extractors/general-conference-speaker.js"],
         }
