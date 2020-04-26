@@ -39,3 +39,8 @@ wget --recursive \
  --remote-encoding=utf-8 \
  --restrict-file-names=nocontrol \ --accept-regex="power-from"
 ```
+
+# Conference Process
+1. Change from "eng" to "spa" (or viceversa)
+2. `node ./src/index.js ./src/extractors/general-conference-html.js`
+3. `kindlegen.exe -c2 .\build\book.opf -o "General Conference - April 2020 English.mobi"`

@@ -59,7 +59,7 @@ function extractTalk(html, index) {
 const getBookContents = function () {
     const basePath = path.join(__dirname, '..', '..', 'tmp');
 
-    return Promise.resolve('https://www.churchofjesuschrist.org/study/general-conference/2020/04/11nelson?lang=spa')
+    return Promise.resolve('https://www.churchofjesuschrist.org/study/general-conference/2020/04/11nelson?lang=eng')
         .then(location => ([
             location,
             path.resolve(__dirname, '..', '..', 'cache', encodeURIComponent(url.parse(location).path.slice(1).replace(/\/$/, '')))
