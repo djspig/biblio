@@ -52,14 +52,14 @@ function extractTalk(html, index) {
                     .replace(/<\/a>/g, '')
                 ))
                 .then(footnotes => footnotes.map((p, idx) => `<a href="#${index}_${idx+1}_b" name="${index}_${idx+1}">[${idx+1}]</a> ${p}`))
-        })
-        .catch(error => console.error('Error extracting article', error)));
+        }))
+        .catch(error => console.error('Error extracting article', error));
 }
 
 const getBookContents = function () {
     const basePath = path.join(__dirname, '..', '..', 'tmp');
 
-    return Promise.resolve('https://www.churchofjesuschrist.org/study/general-conference/2019/10/11holland?lang=spa')
+    return Promise.resolve('https://www.churchofjesuschrist.org/study/general-conference/2020/04/11nelson?lang=spa')
         .then(location => ([
             location,
             path.resolve(__dirname, '..', '..', 'cache', encodeURIComponent(url.parse(location).path.slice(1).replace(/\/$/, '')))
